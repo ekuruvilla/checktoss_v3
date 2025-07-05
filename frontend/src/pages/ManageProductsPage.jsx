@@ -215,7 +215,7 @@ export default function ManageProductsPage() {
                   <button onClick={() => handleDelete(p._id)} style={{ marginLeft: '0.5rem' }}>
                     Delete
                   </button>
-                  <button onClick={() => navigate(`/product/${p._id}`)} style={{ marginLeft: '0.5rem' }}>
+                  <button onClick={() => navigate(`/manufacturer/product/${p._id}`)} style={{ marginLeft: '0.5rem' }}>
                     View
                   </button>
                 </td>

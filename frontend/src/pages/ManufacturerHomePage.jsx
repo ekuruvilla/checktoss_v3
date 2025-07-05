@@ -8,9 +8,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
 
-  useEffect(() => {
-    loadPage(1);
-  }, []);
+  useEffect(() => { loadPage(1);  }, []);
 
   // derive filtered list
   const filtered = products.filter(p =>
@@ -37,7 +35,10 @@ export default function HomePage() {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>All Products</h1>
+      <h1>Manufacturer Dashboard</h1>
+      <Link to="/manufacturer/manage">
+        <button style={{marginBottom:'1rem'}}>Manage Products</button>
+      </Link>
       <input
         type="text"
         placeholder="Search by name or serial…"
@@ -49,7 +50,7 @@ export default function HomePage() {
       <ul>
         {filtered.map(p => (
           <li key={p._id}>
-            <Link to={`/product/${p._id}`}>{p.name}</Link>
+            <Link to={`/manufacturer/product/${p._id}`}>{p.name}</Link>
           </li>
         ))}
       </ul>

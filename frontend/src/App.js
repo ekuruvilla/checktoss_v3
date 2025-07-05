@@ -1,8 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import HomePage from './pages/HomePage.jsx';
-import ProductPage from './pages/ProductPage';
-import ManageProductsPage from './pages/ManageProductsPage.jsx';
+import LandingPage           from './pages/LandingPage';
+import ManufacturerHomePage  from './pages/ManufacturerHomePage';
+import ManageProductsPage    from './pages/ManageProductsPage';
+import ProductPage           from './pages/ProductPage';             // with uploads
+import CustomerHomePage      from './pages/CustomerHomePage';
+import ProductPageReadOnly   from './pages/ProductPageReadOnly'; 
 
 export default function App() {
   return (
@@ -14,20 +17,19 @@ export default function App() {
         gap: '1rem'
       }}>
         <Link to="/">Home</Link>
-        <Link to="/manage">Manage Products</Link>
+        <Link to="/manufacturer/manage">Manage Products</Link>
       </nav>
 
       <main style={{ padding: '2rem' }}>
         <Routes>
-          {/* List all products */}
-          <Route path="/" element={<HomePage />} />
+			<Route path="/"                          element={<LandingPage />} />
+			<Route path="/manufacturer"              element={<ManufacturerHomePage />} />
+			<Route path="/manufacturer/manage"       element={<ManageProductsPage />} />
+			<Route path="/manufacturer/product/:id"  element={<ProductPage />} />
 
-          {/* CRUD UI for products */}
-          <Route path="/manage" element={<ManageProductsPage />} />
-
-          {/* View a single product + manuals */}
-          <Route path="/product/:id" element={<ProductPage />} />
-        </Routes>
+			<Route path="/customer"                  element={<CustomerHomePage />} />
+			<Route path="/customer/product/:id"      element={<ProductPageReadOnly />} />
+      </Routes>
       </main>
     </Router>
   );
