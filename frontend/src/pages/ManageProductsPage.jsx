@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useAuthFetch from '../useAuthFetch';
 
 export default function ManageProductsPage() {
   const API = process.env.REACT_APP_API_URL;
+  const authFetch = useAuthFetch();
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -14,19 +16,20 @@ export default function ManageProductsPage() {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => { loadProducts(1); }, []);
+  useEffect(() => {
+    loadProducts(1);
+  }, []);
 
-	
   // apply search + pagination
   const filtered = products.filter(p =>
-   p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-   (p.serialNumber || '').toLowerCase().includes(searchTerm.toLowerCase())
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.serialNumber || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   async function loadProducts(p) {
     setError('');
     try {
-      const res = await fetch(`${API}/products?page=${p}&limit=10`);
+      const res = await authFetch(`${API}/products?page=${p}&limit=10`);
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `Status ${res.status}`);
@@ -52,7 +55,7 @@ export default function ManageProductsPage() {
     e.preventDefault();
     setError('');
     try {
-      const res = await fetch(`${API}/products`, {
+      const res = await authFetch(`${API}/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
@@ -76,7 +79,7 @@ export default function ManageProductsPage() {
     if (!newName || !newSN) return;
     setError('');
     try {
-      const res = await fetch(`${API}/products/${id}`, {
+      const res = await authFetch(`${API}/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName, serialNumber: newSN })
@@ -97,7 +100,7 @@ export default function ManageProductsPage() {
     if (!window.confirm('Delete this product?')) return;
     setError('');
     try {
-      const res = await fetch(`${API}/products/${id}`, { method: 'DELETE' });
+      const res = await authFetch(`${API}/products/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `Status ${res.status}`);
@@ -112,7 +115,8 @@ export default function ManageProductsPage() {
 
   function toggleSelect(id, checked) {
     const newSet = new Set(selected);
-    if (checked) newSet.add(id); else newSet.delete(id);
+    if (checked) newSet.add(id);
+    else newSet.delete(id);
     setSelected(newSet);
   }
 
@@ -121,7 +125,7 @@ export default function ManageProductsPage() {
     if (!window.confirm(`Delete ${selected.size} selected?`)) return;
     setError('');
     try {
-      const res = await fetch(`${API}/products/bulk-delete`, {
+      const res = await authFetch(`${API}/products/bulk-delete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: [...selected] })
@@ -146,13 +150,13 @@ export default function ManageProductsPage() {
     <div style={{ padding: '2rem' }}>
       <h1>Manage Products</h1>
       {error && <div style={{ color: 'red' }}>Error: {error}</div>}
-	  <input
-       type="text"
-       placeholder="Search by name or serial…"
-       value={searchTerm}
-       onChange={e => setSearchTerm(e.target.value)}
-       style={{ marginBottom: '1rem', padding: '0.5rem', width: '100%' }}
-     />
+      <input
+        type="text"
+        placeholder="Search by name or serial…"
+        value={searchTerm}
+        onChange={e => setSearchTerm(e.target.value)}
+        style={{ marginBottom: '1rem', padding: '0.5rem', width: '100%' }}
+      />
       <form onSubmit={handleAdd} style={{ marginBottom: '1rem' }}>
         <input
           name="name"
@@ -172,7 +176,6 @@ export default function ManageProductsPage() {
         />
         <button type="submit">Add</button>
       </form>
-
       {selected.size > 0 && (
         <div style={{ marginBottom: '1rem' }}>
           <button onClick={handleBulkDelete} style={{ marginRight: '0.5rem' }}>
@@ -185,7 +188,6 @@ export default function ManageProductsPage() {
           )}
         </div>
       )}
-
       {filtered.length === 0 ? (
         <p>No products match your search.</p>
       ) : (
@@ -224,7 +226,6 @@ export default function ManageProductsPage() {
           </tbody>
         </table>
       )}
-
       <nav style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
         <button disabled={page <= 1} onClick={() => loadProducts(page - 1)}>
           ‹ Prev

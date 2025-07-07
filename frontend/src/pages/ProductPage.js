@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import useAuthFetch from '../useAuthFetch';
 
 // Helper to build a nested tree from file paths
 function buildFileTree(files, productId) {
@@ -70,6 +71,7 @@ export default function ProductPage() {
   const descRef = useRef();
   const fileInputRef = useRef();
   const [msg, setMsg] = useState('');
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
     fetchProduct();
@@ -99,7 +101,7 @@ export default function ProductPage() {
     if (description) formData.append('description', description);
 
     try {
-      const res = await fetch(
+      const res = await authfetch(
         `${process.env.REACT_APP_API_URL}/manuals/${id}`,
         { method: 'POST', body: formData }
       );

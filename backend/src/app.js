@@ -21,6 +21,7 @@ async function pruneOrphans() {
 
 pruneOrphans().catch(console.error);
 
+const authRoutes    = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const manualRoutes = require('./routes/manualRoutes');
 const UPLOAD_DIR = path.join(__dirname, '../uploads');
@@ -37,6 +38,10 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Public auth endpoints
+app.use('/api/auth', authRoutes);
+// All product routes now require a valid JWT
+// and manufacturer-only routes will be protected inside the router
 app.use('/api/products', productRoutes);
 app.use('/api/manuals', manualRoutes);
 

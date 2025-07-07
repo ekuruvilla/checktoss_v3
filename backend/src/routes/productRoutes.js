@@ -1,5 +1,4 @@
 const express = require('express');
-const router = express.Router();
 const {
   createProduct,
   getAllProducts,
@@ -10,15 +9,24 @@ const {
   bulkDownloadProducts
 } = require('../controllers/productController');
 
-router.post('/', createProduct);
-router.get('/', getAllProducts);
-router.post('/bulk-delete', bulkDeleteProducts);
-router.get('/bulk-download', bulkDownloadProducts);
-router.get('/:id', getProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct); 
+const { requireAuth, requireManufacturer } = require('../middleware/auth');
 
+const router = express.Router();
+
+// Public product reads
+router.get('/', getAllProducts);
+// Public single product view
+router.get('/:id', getProduct);
+
+// Manufacturer bulk operations
+router.post('/bulk-delete', requireAuth, requireManufacturer, bulkDeleteProducts);
+router.get('/bulk-download', requireAuth, requireManufacturer, bulkDownloadProducts);
+
+
+
+// Manufacturer-only mutating routes
+router.post('/', requireAuth, requireManufacturer, createProduct);
+router.put('/:id', requireAuth, requireManufacturer, updateProduct);
+router.delete('/:id', requireAuth, requireManufacturer, deleteProduct);
 
 module.exports = router;
-
-

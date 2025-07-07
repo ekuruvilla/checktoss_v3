@@ -1,50 +1,68 @@
-// frontend/src/pages/CustomerHomePage.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function CustomerHomePage() {
   const API = process.env.REACT_APP_API_URL;
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]);  // initialize to empty array
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
 
-  useEffect(() => { loadPage(1); }, []);
+  useEffect(() => {
+    loadPage(1);
+  }, []);
 
-  const filtered = products.filter(p =>
+  // derive filtered list safely
+  const filtered = (products || []).filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.serialNumber||'').toLowerCase().includes(searchTerm.toLowerCase())
+    (p.serialNumber || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   async function loadPage(p) {
-    const res = await fetch(`${API}/products?page=${p}&limit=10`);
-    const { products, page: cur, pages: max } = await res.json();
-    setProducts(products); setPage(cur); setPages(max);
+    try {
+      const res = await fetch(`${API}/products?page=${p}&limit=10`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Status ${res.status}`);
+      }
+      const data = await res.json();
+      // Expect data.products array
+      setProducts(data.products || []);
+      setPage(data.page);
+      setPages(data.pages);
+    } catch (err) {
+      console.error('Failed to load products:', err);
+      setProducts([]);  // reset to empty array on error
+    }
   }
 
   return (
-    <div style={{padding:'2rem'}}>
+    <div style={{ padding: '2rem' }}>
       <h1>Find Your Product</h1>
       <input
         type="text"
         placeholder="Search by name or serial…"
         value={searchTerm}
-        onChange={e=>setSearchTerm(e.target.value)}
-        style={{marginBottom:'1rem',width:'100%',padding:'0.5rem'}}
+        onChange={e => setSearchTerm(e.target.value)}
+        style={{ marginBottom: '1rem', padding: '0.5rem', width: '100%' }}
       />
 
       <ul>
-        {filtered.map(p=>(
+        {filtered.map(p => (
           <li key={p._id}>
             <Link to={`/customer/product/${p._id}`}>{p.name}</Link>
           </li>
         ))}
       </ul>
 
-      <nav style={{marginTop:'1rem',display:'flex',gap:'1rem'}}>
-        <button disabled={page<=1} onClick={()=>loadPage(page-1)}>‹ Prev</button>
+      <nav style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+        <button disabled={page <= 1} onClick={() => loadPage(page - 1)}>
+          ‹ Prev
+        </button>
         <span>Page {page} of {pages}</span>
-        <button disabled={page>=pages} onClick={()=>loadPage(page+1)}>Next ›</button>
+        <button disabled={page >= pages} onClick={() => loadPage(page + 1)}>
+          Next ›
+        </button>
       </nav>
     </div>
   );
