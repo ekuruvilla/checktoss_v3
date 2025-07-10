@@ -196,6 +196,7 @@ export default function ManageProductsPage() {
             <tr>
               <th></th>
               <th>Name</th>
+			  <th>Code</th>
               <th>Serial</th>
               <th>Actions</th>
             </tr>
@@ -211,6 +212,7 @@ export default function ManageProductsPage() {
                   />
                 </td>
                 <td>{p.name}</td>
+				<td style={{ fontFamily: 'monospace' }}>{p.productCode}</td>
                 <td>{p.serialNumber}</td>
                 <td>
                   <button onClick={() => handleEdit(p._id)}>Edit</button>

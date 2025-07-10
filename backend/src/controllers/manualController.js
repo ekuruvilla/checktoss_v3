@@ -5,7 +5,8 @@ const Product = require('../models/Product');
 
 exports.uploadManuals = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.productId);
+    const { productId } = req.params;
+    const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
     const { version, description } = req.body;
@@ -15,15 +16,14 @@ exports.uploadManuals = async (req, res) => {
       const relative = file.path.split('/uploads/').pop();
       const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${relative}`;
 
-      const manual = await Manual.create({
-        product: product._id,
-        title: file.originalname,
+      const manual = new Manual({
+        product:     product._id,
+        title:       file.originalname,
         fileUrl,
         version,
         description
       });
-
-      product.manuals.push(manual._id);
+      await manual.save();
       saved.push(manual);
     }
     await product.save();

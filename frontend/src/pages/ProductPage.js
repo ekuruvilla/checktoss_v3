@@ -101,7 +101,7 @@ export default function ProductPage() {
     if (description) formData.append('description', description);
 
     try {
-      const res = await authfetch(
+      const res = await authFetch(
         `${process.env.REACT_APP_API_URL}/manuals/${id}`,
         { method: 'POST', body: formData }
       );
@@ -123,7 +123,8 @@ export default function ProductPage() {
   if (!product) return <div>Loading…</div>;
 
   // Filter manuals by selected file type
-  const manualsToShow = product.manuals.filter(m => {
+  const allManuals = product.manuals || [];
+  const manualsToShow = allManuals.filter(m => {
     if (fileType === 'all') return true;
     const ext = m.fileUrl.split('.').pop().toLowerCase();
     if (fileType === 'pdf') return ext === 'pdf';

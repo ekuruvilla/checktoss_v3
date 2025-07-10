@@ -41,7 +41,7 @@ export default function CustomerHomePage() {
       <h1>Find Your Product</h1>
       <input
         type="text"
-        placeholder="Search by name or serial…"
+        placeholder="Search by product code, name or serial…"
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
         style={{ marginBottom: '1rem', padding: '0.5rem', width: '100%' }}

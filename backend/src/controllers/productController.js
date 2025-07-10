@@ -9,16 +9,25 @@ const archiver = require('archiver');
 exports.createProduct = async (req, res) => {
   try {
     const { name, serialNumber } = req.body;
-    let product = new Product({ name, serialNumber });
-    product = await product.save();
 
-    const url = `${process.env.FRONTEND_URL}/product/${product._id}`;
+    // 1) Create & save — triggers pre-save hook that sets productCode
+    let product = new Product({ name, serialNumber });
+    await product.save();
+
+    // 2) Generate QR code based on the 8-char code
+    //    e.g. https://yourapp.com/product/AB12CD34
+    const url = `${process.env.FRONTEND_URL}/product/${product.productCode}`;
     const qrCodeImage = await QRCode.toDataURL(url);
+
+    // 3) Save the QR code image URL back onto the product
     product.qrCodeImage = qrCodeImage;
     await product.save();
 
-    res.json(product);
+    // 4) Return the full product
+    //    (includes: _id, name, serialNumber, productCode, qrCodeImage, timestamps…)
+    res.status(201).json(product);
   } catch (err) {
+    console.error('createProduct error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -84,11 +93,23 @@ exports.deleteProduct = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('manuals');
-    if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.json(product);
+    // 1) Fetch the product
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // 2) Fetch all manuals associated with it
+    const manuals = await Manual.find({ product: product._id }).sort({ createdAt: -1 });
+
+    // 3) Return product + manuals array
+    return res.json({
+      ...product.toObject(),
+      manuals
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('getProduct error:', err);
+    return res.status(500).json({ message: 'Server error fetching product', detail: err.message });
   }
 };
 
@@ -104,9 +125,10 @@ exports.getAllProducts = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select('name serialNumber _id');
+      .select('name serialNumber productCode qrCodeImage _id');
 
-    res.json({ products, page, pages, total });
+    // send back both the array and pagination info
+	res.json({ products, page, pages, total });
   } catch (err) {
     console.error('getAllProducts error:', err);
     res.status(500).json({ message: 'Server error fetching products', detail: err.message });
