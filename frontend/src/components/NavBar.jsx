@@ -10,7 +10,7 @@ export default function NavBar() {
       display: 'flex',
       alignItems: 'center',
       padding: '1rem',
-      backgroundColor: '#f5f5f5'
+      backgroundColor: 'transparent'
     }}>
       <Link to="/" style={{ marginRight: '1rem' }}>Home</Link>
       {user?.role === 'manufacturer' && (
