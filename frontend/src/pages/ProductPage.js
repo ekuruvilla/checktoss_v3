@@ -18,46 +18,41 @@ function buildFileTree(files, productId) {
 }
 
 // Recursive component to render the tree
-const TreeNode = ({ node, name }) => {
+const TreeNode = ({ node, name, onDelete }) => {
   const isFile = node.fileUrl !== undefined;
   const [open, setOpen] = useState(false);
 
   if (isFile) {
     return (
-      <div style={{ paddingLeft: '1rem' }}>
-        <a href={node.fileUrl} target="_blank" rel="noopener noreferrer">
+      <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '1rem' }}>
+        <a href={node.fileUrl} target="_blank" rel="noopener noreferrer" style={{ flexGrow: 1 }}>
           {node.title}
         </a>
-        {node.version && (
-          <span style={{ marginLeft: '0.5rem', color: '#666' }}>
-            (v{node.version})
-          </span>
-        )}
-        {node.createdAt && (
-          <span style={{ marginLeft: '0.5rem', color: '#666' }}>
-            {new Date(node.createdAt).toLocaleString()}
-          </span>
-        )}
-        {node.description && (
-          <div style={{ fontStyle: 'italic', marginLeft: '1.5rem' }}>
-            {node.description}
-          </div>
-        )}
+        <button
+          onClick={() => onDelete(node._id)}
+          style={{
+            marginLeft: '0.5rem',
+            background: 'transparent',
+            border: 'none',
+            color: 'red',
+            cursor: 'pointer'
+          }}
+          title="Delete manual"
+        >
+          🗑️
+        </button>
       </div>
     );
   }
 
   return (
     <div style={{ paddingLeft: '0.5rem' }}>
-      <div
-        onClick={() => setOpen(!open)}
-        style={{ cursor: 'pointer', fontWeight: 'bold' }}
-      >
+      <div onClick={() => setOpen(!open)} style={{ cursor: 'pointer', fontWeight: 'bold' }}>
         {open ? '📂' : '📁'} {name}
       </div>
       {open &&
         Object.keys(node).map(key => (
-          <TreeNode key={key} name={key} node={node[key]} />
+          <TreeNode key={key} name={key} node={node[key]} onDelete={onDelete} />
         ))}
     </div>
   );
@@ -65,13 +60,13 @@ const TreeNode = ({ node, name }) => {
 
 export default function ProductPage() {
   const { id } = useParams();
+  const authFetch = useAuthFetch();
   const [product, setProduct] = useState(null);
   const [fileType, setFileType] = useState('all');
   const versionRef = useRef();
   const descRef = useRef();
   const fileInputRef = useRef();
   const [msg, setMsg] = useState('');
-  const authFetch = useAuthFetch();
 
   useEffect(() => {
     fetchProduct();
@@ -119,6 +114,28 @@ export default function ProductPage() {
       setMsg(`Upload error: ${err.message}`);
     }
   };
+  
+	const handleDeleteManual = async manualId => {
+	  console.log('👉 handleDeleteManual called with id:', manualId);
+	  if (!window.confirm('Delete this manual?')) return;
+	  setMsg('');
+	  try {
+		const res = await authFetch(
+		  `${process.env.REACT_APP_API_URL}/manuals/${manualId}`,
+		  { method: 'DELETE' }
+		);
+		if (!res.ok) {
+		  const text = await res.text();
+		  throw new Error(text || `Status ${res.status}`);
+		}
+		setMsg('Manual deleted');
+		// Reload product (including manuals)
+		fetchProduct();
+	  } catch (err) {
+		console.error('delete manual failed', err);
+		setMsg(`Delete error: ${err.message}`);
+	  }
+};
 
   if (!product) return <div>Loading…</div>;
 
@@ -139,6 +156,8 @@ export default function ProductPage() {
   return (
     <div style={{ padding: '2rem' }}>
       <h1>{product.name}</h1>
+	  <h2>Serial: {product.serialNumber}</h2>
+	  <h2>UID: {product.productCode}</h2>
       <img
         src={product.qrCodeImage}
         alt="QR Code for product"
@@ -164,7 +183,7 @@ export default function ProductPage() {
 
       {/* Upload form */}
       <section style={{ margin: '1.5rem 0' }}>
-        <h2>Upload Manuals (metadata optional)</h2>
+        <h2>Upload Manuals</h2>
         <form onSubmit={handleUpload}>
           <div style={{ marginBottom: '0.5rem' }}>
             <label>
@@ -207,11 +226,11 @@ export default function ProductPage() {
       {/* Tree view of manuals */}
       <section>
         <h2>Manuals</h2>
-        {Object.keys(tree).length === 0 ? (
+        {tree && Object.keys(tree).length === 0 ? (
           <p>No manuals available.</p>
         ) : (
           Object.keys(tree).map(key => (
-            <TreeNode key={key} name={key} node={tree[key]} />
+            <TreeNode key={key} name={key} node={tree[key]} onDelete={handleDeleteManual} />
           ))
         )}
       </section>

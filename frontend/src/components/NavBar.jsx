@@ -15,7 +15,7 @@ export default function NavBar() {
       <Link to="/" style={{ marginRight: '1rem' }}>Home</Link>
       {user?.role === 'manufacturer' && (
         <Link to="/manufacturer" style={{ marginRight: '1rem' }}>
-          Manufacturer Dashboard
+          Dashboard
         </Link>
       )}
       {user ? (

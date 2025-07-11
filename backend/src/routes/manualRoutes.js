@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { uploadManuals, deleteManual } = require('../controllers/manualController');
+const { requireAuth, requireManufacturer } = require('../middleware/auth');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -33,6 +34,6 @@ const router = express.Router();
 // Upload multiple manuals
 router.post('/:productId', upload.array('manuals', 20), uploadManuals);
 // Delete a manual
-router.delete('/:manualId', deleteManual);
+router.delete('/:id', requireAuth, requireManufacturer, deleteManual);
 
 module.exports = router;

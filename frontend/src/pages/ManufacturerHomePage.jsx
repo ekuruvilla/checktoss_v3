@@ -35,7 +35,7 @@ export default function HomePage() {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>Manufacturer Dashboard</h1>
+      <h1>Dashboard</h1>
       <Link to="/manufacturer/manage">
         <button style={{marginBottom:'1rem'}}>Manage Products</button>
       </Link>

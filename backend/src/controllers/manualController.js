@@ -35,16 +35,18 @@ exports.uploadManuals = async (req, res) => {
 };
 
 exports.deleteManual = async (req, res) => {
+	console.log('⏱ deleteManual called with id:', req.params.id);
   try {
 	// Find the manual record
-    const manual = await Manual.findById(req.params.manualId);
-    if (!manual) return res.status(404).json({ message: 'Manual not found' });
+    const manual = await Manual.findById(req.params.id);
+    if (!manual) {
+      console.log('⚠️ No manual found for id:', req.params.id);
+      return res.status(404).json({ message: 'Manual not found' });
+    }
 	
 	// Compute the on-disk path
-    // manual.fileUrl: http://host/uploads/<productId>/manuals/1625…-foo.pdf
-    // .split('/uploads/') → [..., '<productId>/manuals/1625…-foo.pdf']
-    const relativePath = manual.fileUrl.split('/uploads/').pop();
-    const filePath = path.join(__dirname, '../../uploads', relativePath);
+    const rel = manual.fileUrl.split('/uploads/').pop();
+    const filePath = path.join(__dirname, '../../uploads', rel);
 
     // Delete file from disk
     if (fs.existsSync(filePath)) {
@@ -52,11 +54,16 @@ exports.deleteManual = async (req, res) => {
     } else {
       console.warn(`File missing on disk: ${filePath}`);
     }
+	
+	// Remove the manual record
+    await manual.deleteOne();
+	
+	// If you keep a manuals[] on Product, pull it out here
+    await Product.updateOne(
+      { _id: manual.product },
+      { $pull: { manuals: manual._id } }
+    );
 
-    // Remove manual reference from product
-    await Product.findByIdAndUpdate(manual.product, { $pull: { manuals: manual._id } });
-
-    await manual.remove();
     res.json({ message: 'Manual deleted' });
   } catch (err) {
 	console.error('deleteManual error:', err);

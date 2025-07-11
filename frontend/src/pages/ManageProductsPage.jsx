@@ -183,7 +183,7 @@ export default function ManageProductsPage() {
           </button>
           {bulkDownloadUrl && (
             <a href={bulkDownloadUrl} target="_blank" rel="noopener noreferrer">
-              Download ZIP
+              Download Selected As ZIP File
             </a>
           )}
         </div>
