@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
+import logo from '../assets/Logo.png'; // adjust path to your logo file
 
 export default function NavBar() {
   const { user, logout } = useContext(AuthContext);
@@ -10,12 +11,14 @@ export default function NavBar() {
       display: 'flex',
       alignItems: 'center',
       padding: '1rem',
-      backgroundColor: 'transparent'
+      backgroundColor: '#000'
     }}>
-      <Link to="/" style={{ marginRight: '1rem' }}>Home</Link>
+      <Link to="/" style={{ marginRight: '1rem', display: 'flex', alignItems: 'center' }}>
+        <img src={logo} alt="Checktoss Logo" style={{ height: '40px' }} />
+      </Link>
       {user?.role === 'manufacturer' && (
         <Link to="/manufacturer" style={{ marginRight: '1rem' }}>
-          Dashboard
+          {user.name}
         </Link>
       )}
       {user ? (
@@ -29,5 +32,5 @@ export default function NavBar() {
         </div>
       )}
     </nav>
-);
+  );
 }

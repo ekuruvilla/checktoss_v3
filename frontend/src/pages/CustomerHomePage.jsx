@@ -13,10 +13,14 @@ export default function CustomerHomePage() {
   }, []);
 
   // derive filtered list safely
-  const filtered = (products || []).filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.serialNumber || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = (products || []).filter(p =>{
+    const term = searchTerm.toLowerCase();
+    return (
+      p.name.toLowerCase().includes(term) ||
+      (p.serialNumber || '').toLowerCase().includes(term) ||
+      (p.productCode || '').toLowerCase().includes(term)
+    );
+  });
 
   async function loadPage(p) {
     try {

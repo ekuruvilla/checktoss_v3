@@ -90,6 +90,8 @@ export default function ProductPageReadOnly() {
   return (
     <div style={{padding:'2rem'}}>
       <h1>{product.name}</h1>
+	  <h2>Serial: {product.serialNumber}</h2>
+	  <h2>UID: {product.productCode}</h2>
       <img src={product.qrCodeImage} alt="QR" style={{maxWidth:'150px'}} />
 
       <div style={{margin:'1rem 0'}}>

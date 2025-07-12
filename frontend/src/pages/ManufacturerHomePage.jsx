@@ -11,10 +11,14 @@ export default function HomePage() {
   useEffect(() => { loadPage(1);  }, []);
 
   // derive filtered list
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.serialNumber || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = products.filter(p =>{
+    const term = searchTerm.toLowerCase();
+    return (
+      p.name.toLowerCase().includes(term) ||
+      (p.serialNumber||'').toLowerCase().includes(term) ||
+      (p.productCode||'').toLowerCase().includes(term)
+    );
+  });
 
   async function loadPage(p) {
     try {
@@ -41,7 +45,7 @@ export default function HomePage() {
       </Link>
       <input
         type="text"
-        placeholder="Search by name or serial…"
+        placeholder="Search by product code, name or serial…"
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
         style={{ marginBottom: '1rem', padding: '0.5rem', width: '100%' }}
